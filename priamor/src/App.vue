@@ -23,29 +23,41 @@
     </nav>
     <div class="row">
       <div class="col-lg-12">
-        {{ selectedValute }}
-        {{ datesRange }}
+        <p class="currency-info">Курс {{ nominal }} {{ valutes[selectedValute] }} за период {{ datesRange }}</p>
+        <div class="chartjs">
+          <line-chart
+            :chart-data="chartDataCollection"
+            v-if="chartReady"
+            :options="{responsive: true, maintainAspectRatio: false}">
+          </line-chart>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import LineChart from './LineChart.js'
 export default {
   name: 'app',
+  components: {
+    LineChart
+  },
   data () {
     return {
       apiUrl: "http://priam.local/api/valute/",
       valutes : {},
+      nominal: null,
       selectedValute: null,
-      datesRange: null
+      datesRange: null,
+      chartDataCollection: {},
+      chartReady: false
     }
   },
   mounted() {
     this.getValutes();
-
     const startDate = '2020-03-05';
-    const endDate = '2020-12-31';
+    const endDate = new Date (new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0,10);
 
     $('#dates-input').daterangepicker({
       "minDate": startDate,
@@ -112,10 +124,26 @@ export default {
       }
     },
     makeDataset(arData) {
-      //TODO
+      let labels, data, backgroundColor, defaultBgColor, label;
+      labels = [];
+      data = [];
+      backgroundColor = [];
+      defaultBgColor = 'rgba(100, 255, 132, 0.2)';
+      arData.forEach((obj, i, arr) => {
+        this.nominal = obj['nominal']
+        labels.push(obj['date']);
+        data.push(obj['value']);
+        backgroundColor.push(defaultBgColor);
+        label = obj['charCode']
+      });
+      this.chartDataCollection = {
+        "labels": labels,
+        "datasets": [{"label": label, "backgroundColor" : backgroundColor, "data": data}],
+        "backgroundColor": defaultBgColor,
+      }
+      this.chartReady = true
     }
   }
-
 }
 </script>
 
@@ -152,5 +180,9 @@ a {
 }
 .navbar > form > select, .navbar > form > input {
   max-width: 200px;
+}
+.currency-info {
+  margin-top: 7px;
+  text-align: center;
 }
 </style>
