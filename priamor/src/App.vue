@@ -123,22 +123,24 @@ export default {
           .catch(e => console.log(e));
       }
     },
-    makeDataset(arData) {
+    makeDataset: function (arData) {
       let labels, data, backgroundColor, defaultBgColor, label;
       labels = [];
       data = [];
       backgroundColor = [];
       defaultBgColor = 'rgba(100, 255, 132, 0.2)';
       arData.forEach((obj, i, arr) => {
-        this.nominal = obj['nominal']
+        if (i === 0) {
+          this.nominal = obj['nominal']
+        }
         labels.push(obj['date']);
-        data.push(obj['value']);
+        data.push((obj['value'] * this.nominal / obj['nominal']).toFixed(4));
         backgroundColor.push(defaultBgColor);
         label = obj['charCode']
       });
       this.chartDataCollection = {
         "labels": labels,
-        "datasets": [{"label": label, "backgroundColor" : backgroundColor, "data": data}],
+        "datasets": [{"label": label, "backgroundColor": backgroundColor, "data": data}],
         "backgroundColor": defaultBgColor,
       }
       this.chartReady = true
@@ -179,6 +181,7 @@ a {
   margin-right: 15px;
 }
 .navbar > form > select, .navbar > form > input {
+  min-width: 175px;
   max-width: 200px;
 }
 .currency-info {
