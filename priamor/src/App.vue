@@ -3,27 +3,48 @@
     <nav class="navbar navbar-light bg-light pt-3">
     <a class="navbar-brand" href="#">PRIAMOR</a>
       <form class="form-inline">
-      <label for="currency-select">Валюта</label>
-      <select id="currency-select" class="form-control" v-model="selectedValute">
-        <option v-for="(value, name) in valutes" :value=name>
-          {{ value }}
-        </option>
-      </select>
-      <label for="dates-input">Даты</label>
-      <input type="text" id="dates-input" class="form-control" v-model="datesRange">
-      <button
-        class="btn btn-outline-success my-2 my-sm-0"
-        :disabled="!this.selectedValute || !this.datesRange"
-        type="button"
-        @click="getCurrencyData"
-      >
-        Поиск
-      </button>
+        <label for="currency-select">Валюта</label>
+
+        <select id="currency-select" class="form-control" v-model="selectedValute">
+          <option v-for="(value, name) in valutes" :value=name>
+            {{ value }}
+          </option>
+        </select>
+
+        <label for="form__date-range">Даты</label>
+
+        <date-range-picker
+          id="form__date-range"
+          v-model="dateRange"
+          :locale-data="localeData"
+          :min-date="minDate"
+          :max-date="maxDate"
+          :opens="'left'"
+          :auto-apply="true"
+          :ranges="false"
+          @update="setDateRange"
+        >
+          <!--Optional scope for the input displaying the dates -->
+          <div slot="input" slot-scope="picker">
+            {{ picker.startDate | date }} - {{ picker.endDate | date }}
+          </div>
+        </date-range-picker>
+
+        <button
+          class="btn btn-outline-success my-2 my-sm-0"
+          :disabled="!this.selectedValute || !this.dateRange"
+          type="button"
+          @click="getCurrencyData"
+        >
+          Поиск
+        </button>
       </form>
     </nav>
     <div class="row">
       <div class="col-lg-12">
-        <p class="currency-info">Курс {{ nominal }} {{ valutes[selectedValute] }} за период {{ datesRange }}</p>
+        <p class="currency-info">Курс {{ nominal }} {{ valutes[selectedValute] }}
+          за период {{ dateRange.startDate }} - {{ dateRange.endDate }}
+        </p>
         <div class="chartjs">
           <line-chart
             :chart-data="chartDataCollection"
@@ -38,33 +59,23 @@
 
 <script>
 import LineChart from './LineChart.js'
+import DateRangePicker from "vue2-daterange-picker";
+import "vue2-daterange-picker/dist/vue2-daterange-picker.css";
+
 export default {
   name: 'app',
   components: {
-    LineChart
-  },
+    LineChart, DateRangePicker  },
   data () {
     return {
       apiUrl: "http://priam.local/api/valute/",
       valutes : {},
       nominal: null,
       selectedValute: null,
-      datesRange: null,
+      dateRange: {"startDate": null, "endDate": null},
       chartDataCollection: {},
-      chartReady: false
-    }
-  },
-  mounted() {
-    this.getValutes();
-    const startDate = '2020-03-05';
-    const endDate = new Date (new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0,10);
-
-    $('#dates-input').daterangepicker({
-      "minDate": startDate,
-      "maxDate": endDate,
-      "autoApply": true,
-      "autoUpdateInput": true,
-      "locale": {
+      chartReady: false,
+      localeData: {
         "format": 'YYYY-MM-DD',
         "separator": " / ",
         //"applyLabel": "Применить",
@@ -73,35 +84,16 @@ export default {
         "toLabel": "ПО",
         "customRangeLabel": "Custom",
         "weekLabel": "Нед",
-        "daysOfWeek": [
-          "Вс",
-          "Пн",
-          "Вт",
-          "Ср",
-          "Чт",
-          "Пт",
-          "Сб"
-        ],
-        "monthNames": [
-          "Январь",
-          "Февраль",
-          "Март",
-          "Апрель",
-          "Май",
-          "Июнь",
-          "Июль",
-          "Август",
-          "Сентябрь",
-          "Октябрь",
-          "Ноябрь",
-          "Декабрь"
+        "daysOfWeek": ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+        "monthNames": ["Январь", "Февраль", "Март", "Апрель", "Май",
+          "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
         ],
         "firstDay": 1
       }
-    })
-      .on('apply.daterangepicker', (e, picker) => {
-        this.datesRange = e.target.value;
-      });
+    }
+  },
+  mounted() {
+    this.getValutes();
   },
   methods: {
     getValutes() {
@@ -114,8 +106,9 @@ export default {
       this.valutes = oValutes;
     },
     getCurrencyData() {
-      if (!!this.selectedValute && !!this.datesRange) {
-        let url = this.apiUrl + this.selectedValute + '/' + this.datesRange;
+      if (!!this.selectedValute && !!this.dateRange.startDate && !!this.dateRange.endDate) {
+        let url = this.apiUrl + this.selectedValute + '/' +
+          this.dateRange.startDate + '/' + this.dateRange.endDate;
         url = url.replace(/\s+/g, '');
         fetch(url)
           .then(response => response.json())
@@ -124,68 +117,50 @@ export default {
       }
     },
     makeDataset: function (arData) {
-      let labels, data, backgroundColor, defaultBgColor, label;
+      let labels, data, backgroundColor, borderColor, label;
       labels = [];
       data = [];
-      backgroundColor = [];
-      defaultBgColor = 'rgba(100, 255, 132, 0.2)';
+      borderColor = 'rgba(100, 132, 255, 0.9)';
+      backgroundColor = 'rgba(100, 132, 255, 0.1)';
       arData.forEach((obj, i, arr) => {
         if (i === 0) {
           this.nominal = obj['nominal']
         }
         labels.push(obj['date']);
         data.push((obj['value'] * this.nominal / obj['nominal']).toFixed(4));
-        backgroundColor.push(defaultBgColor);
         label = obj['charCode']
       });
       this.chartDataCollection = {
         "labels": labels,
         "datasets": [{"label": label, "backgroundColor": backgroundColor, "data": data}],
-        "backgroundColor": defaultBgColor,
+        "backgroundColor": backgroundColor,
       }
       this.chartReady = true
+    },
+    setDateRange(event) {
+      console.log(event)
+      if (!!event.startDate && !!event.endDate) {
+        this.dateRange.startDate = new Date(event.startDate).toISOString().slice(0,10);
+        this.dateRange.endDate = new Date(event.endDate).toISOString().slice(0,10);
+      }
+    },
+  },
+  computed: {
+    minDate () {
+      return '2020-03-05';
+      },
+    maxDate () {
+      return new Date (new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0,10);
+    }
+  },
+  filters: {
+    date(value) {
+      if (!!value) {
+        return value.toISOString().slice(0,10)
+      } else {
+        return null;
+      }
     }
   }
 }
 </script>
-
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
-
-.navbar > form > label, .navbar > form > select, .navbar > form > input {
-  margin-right: 15px;
-}
-.navbar > form > select, .navbar > form > input {
-  min-width: 175px;
-  max-width: 200px;
-}
-.currency-info {
-  margin-top: 7px;
-  text-align: center;
-}
-</style>
