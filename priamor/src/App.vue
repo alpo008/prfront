@@ -138,7 +138,6 @@ export default {
       this.chartReady = true
     },
     setDateRange(event) {
-      console.log(event)
       if (!!event.startDate && !!event.endDate) {
         this.dateRange.startDate = new Date(event.startDate).toISOString().slice(0,10);
         this.dateRange.endDate = new Date(event.endDate).toISOString().slice(0,10);
