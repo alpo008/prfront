@@ -25,8 +25,10 @@
           @update="setDateRange"
         >
           <!--Optional scope for the input displaying the dates -->
-          <div slot="input" slot-scope="picker">
-            {{ picker.startDate | date }} - {{ picker.endDate | date }}
+          <div slot="input" slot-scope="picker" style="min-height: 24px">
+            {{ picker.startDate | date }}
+            {{ !picker.startDate ? '' : '-' }}
+            {{ picker.endDate | date }}
           </div>
         </date-range-picker>
 
@@ -43,7 +45,10 @@
     <div class="row">
       <div class="col-lg-12">
         <p class="currency-info">Курс {{ nominal }} {{ valutes[selectedValute] }}
-          за период {{ dateRange.startDate }} - {{ dateRange.endDate }}
+          за период
+          {{ dateRange.startDate }}
+          {{!dateRange.startDate ? '' : '-'}}
+          {{ dateRange.endDate }}
         </p>
         <div class="chartjs">
           <line-chart
@@ -65,7 +70,9 @@ import "vue2-daterange-picker/dist/vue2-daterange-picker.css";
 export default {
   name: 'app',
   components: {
-    LineChart, DateRangePicker  },
+    lineChart: LineChart,
+    dateRangePicker: DateRangePicker
+  },
   data () {
     return {
       apiUrl: "http://priam.local/api/valute/",
@@ -138,8 +145,10 @@ export default {
       this.chartReady = true
     },
     setDateRange(event) {
-      if (!!event.startDate && !!event.endDate) {
+      if (!!event.startDate) {
         this.dateRange.startDate = new Date(event.startDate).toISOString().slice(0,10);
+      }
+      if (!!event.endDate) {
         this.dateRange.endDate = new Date(event.endDate).toISOString().slice(0,10);
       }
     },
@@ -154,7 +163,7 @@ export default {
   },
   filters: {
     date(value) {
-      if (!!value) {
+      if (!!value && typeof value === 'object') {
         return value.toISOString().slice(0,10)
       } else {
         return null;
