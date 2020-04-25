@@ -163,7 +163,7 @@ export default {
   },
   filters: {
     date(value) {
-      if (!!value && typeof value === 'object') {
+      if (!!value && typeof value === 'object' && typeof value.toISOString === 'function') {
         return value.toISOString().slice(0,10)
       } else {
         return null;
