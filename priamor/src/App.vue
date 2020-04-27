@@ -3,13 +3,9 @@
     <nav class="navbar navbar-light bg-light pt-3">
     <a class="navbar-brand" href="#">PRIAMOR</a>
       <form class="form-inline">
-        <label for="currency-select">Валюта</label>
 
-        <select id="currency-select" class="form-control" v-model="selectedValute">
-          <option v-for="(value, name) in valutes" :value=name>
-            {{ value }}
-          </option>
-        </select>
+        <app-dropdown :apiUrl="apiUrl" @valuteSelected="setValute">
+        </app-dropdown>
 
         <label for="form__date-range">Даты</label>
 
@@ -44,7 +40,7 @@
     </nav>
     <div class="row">
       <div class="col-lg-12">
-        <p class="currency-info">Курс {{ nominal }} {{ valutes[selectedValute] }}
+        <p class="currency-info">Курс {{ nominal }} {{ selectedValuteName }}
           за период
           {{ dateRange.startDate }}
           {{!dateRange.startDate ? '' : '-'}}
@@ -63,22 +59,25 @@
 </template>
 
 <script>
-import LineChart from './LineChart.js'
+
+import Dropdown from "./Dropdown";
 import DateRangePicker from "vue2-daterange-picker";
 import "vue2-daterange-picker/dist/vue2-daterange-picker.css";
+import LineChart from "./LineChart";
 
 export default {
   name: 'app',
   components: {
+    appDropdown: Dropdown,
     lineChart: LineChart,
     dateRangePicker: DateRangePicker
   },
   data () {
     return {
       apiUrl: "http://priam.local/api/valute/",
-      valutes : {},
       nominal: null,
       selectedValute: null,
+      selectedValuteName: null,
       dateRange: {"startDate": null, "endDate": null},
       chartDataCollection: {},
       chartReady: false,
@@ -99,18 +98,10 @@ export default {
       }
     }
   },
-  mounted() {
-    this.getValutes();
-  },
   methods: {
-    getValutes() {
-      fetch(this.apiUrl, {method: 'GET'})
-        .then(response => response.json())
-        .then(res => this.setValutes(res) )
-        .catch(e => console.log(e));
-    },
-    setValutes(oValutes) {
-      this.valutes = oValutes;
+    setValute (e) {
+      this.selectedValute = e.code;
+      this.selectedValuteName = e.name;
     },
     getCurrencyData() {
       if (!!this.selectedValute && !!this.dateRange.startDate && !!this.dateRange.endDate) {
@@ -142,7 +133,7 @@ export default {
         "datasets": [{"label": label, "backgroundColor": backgroundColor, "data": data}],
         "backgroundColor": backgroundColor,
       }
-      this.chartReady = true
+      this.chartReady = true;
     },
     setDateRange(event) {
       if (!!event.startDate) {
@@ -159,7 +150,7 @@ export default {
       },
     maxDate () {
       return new Date (new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0,10);
-    }
+    },
   },
   filters: {
     date(value) {
