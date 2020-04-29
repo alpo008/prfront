@@ -1,8 +1,8 @@
 <template>
   <div class="container-fluid">
-    <nav class="navbar navbar-light bg-light pt-3">
-    <a class="navbar-brand" href="#">PRIAMOR</a>
-      <form class="form-inline">
+    <nav class="navbar navbar-light bg-light pt-3 navbar-responsive">
+      <a class="navbar-brand" href="#">PRIAMOR</a>
+      <form class="form-inline my-2 my-lg-0">
 
         <app-dropdown :apiUrl="apiUrl" @valuteSelected="setValute">
         </app-dropdown>
@@ -74,7 +74,7 @@ export default {
   },
   data () {
     return {
-      apiUrl: "http://priam.local/api/valute/",
+      apiUrl: "http://alpo.pw/api/valute/",
       nominal: null,
       selectedValute: null,
       selectedValuteName: null,
@@ -124,14 +124,15 @@ export default {
         if (i === 0) {
           this.nominal = obj['nominal']
         }
-        labels.push(obj['date']);
+        labels.push(this.nominal + ' ' + obj['charCode']);
         data.push((obj['value'] * this.nominal / obj['nominal']).toFixed(4));
-        label = obj['charCode']
       });
       this.chartDataCollection = {
         "labels": labels,
-        "datasets": [{"label": label, "backgroundColor": backgroundColor, "data": data}],
+        "datasets": [{"label": this.selectedValuteName, "backgroundColor": backgroundColor, "data": data, "borderColor": borderColor}],
         "backgroundColor": backgroundColor,
+        "color": borderColor,
+        "borderWidth": 4
       }
       this.chartReady = true;
     },

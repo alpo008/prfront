@@ -3,6 +3,7 @@
     <label for="currency-select">Валюта</label>
 
     <select id="currency-select" class="form-control" @change="selectValute">
+      <option value="null"></option>
       <option v-for="(value, name) in valutes" :value=name>
         {{ value }}
       </option>
