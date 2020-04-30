@@ -10,15 +10,16 @@
         <label for="form__date-range">Даты</label>
 
         <date-range-picker
-          id="form__date-range"
-          v-model="dateRange"
-          :locale-data="localeData"
-          :min-date="minDate"
-          :max-date="maxDate"
-          :opens="'left'"
           :auto-apply="true"
+          :locale-data="localeData"
+          :max-date="maxDate"
+          :min-date="minDate"
+          :opens="'left'"
           :ranges="false"
           @update="setDateRange"
+          id="form__date-range"
+          v-model="dateRange"
+
         >
           <!--Optional scope for the input displaying the dates -->
           <div slot="input" slot-scope="picker" style="min-height: 24px">
@@ -27,31 +28,20 @@
             {{ picker.endDate | date }}
           </div>
         </date-range-picker>
-
-        <button
-          class="btn btn-outline-success my-2 my-sm-0"
-          :disabled="!this.selectedValute || !this.dateRange"
-          type="button"
-          @click="getCurrencyData"
-        >
-          Поиск
-        </button>
       </form>
     </nav>
     <div class="row">
       <div class="col-lg-12">
-        <p class="currency-info">Курс {{ nominal }} {{ selectedValuteName }}
-          за период
-          {{ dateRange.startDate }}
-          {{!dateRange.startDate ? '' : '-'}}
-          {{ dateRange.endDate }}
-        </p>
         <div class="chartjs">
-          <line-chart
-            :chart-data="chartDataCollection"
-            v-if="chartReady"
-            :options="{responsive: true, maintainAspectRatio: false}">
-          </line-chart>
+          <valute-line-chart
+            :dateRange="dateRange"
+            :selectedValute="selectedValute"
+            :selectedValuteName="selectedValuteName"
+            :apiUrl="apiUrl"
+            :dataChanged="dataChanged"
+            @resetDataChanged="dataChanged = false"
+          >
+          </valute-line-chart>
         </div>
       </div>
     </div>
@@ -63,14 +53,14 @@
 import Dropdown from "./Dropdown";
 import DateRangePicker from "vue2-daterange-picker";
 import "vue2-daterange-picker/dist/vue2-daterange-picker.css";
-import LineChart from "./LineChart";
+import ValuteLineChart from "./LineChart.vue";
 
 export default {
   name: 'app',
   components: {
     appDropdown: Dropdown,
-    lineChart: LineChart,
-    dateRangePicker: DateRangePicker
+    dateRangePicker: DateRangePicker,
+    valuteLineChart: ValuteLineChart
   },
   data () {
     return {
@@ -79,8 +69,7 @@ export default {
       selectedValute: null,
       selectedValuteName: null,
       dateRange: {"startDate": null, "endDate": null},
-      chartDataCollection: {},
-      chartReady: false,
+      dataChanged: false,
       localeData: {
         "format": 'YYYY-MM-DD',
         "separator": " / ",
@@ -102,39 +91,7 @@ export default {
     setValute (e) {
       this.selectedValute = e.code;
       this.selectedValuteName = e.name;
-    },
-    getCurrencyData() {
-      if (!!this.selectedValute && !!this.dateRange.startDate && !!this.dateRange.endDate) {
-        let url = this.apiUrl + this.selectedValute + '/' +
-          this.dateRange.startDate + '/' + this.dateRange.endDate;
-        url = url.replace(/\s+/g, '');
-        fetch(url)
-          .then(response => response.json())
-          .then(res => this.makeDataset(res) )
-          .catch(e => console.log(e));
-      }
-    },
-    makeDataset: function (arData) {
-      let labels, data, backgroundColor, borderColor, label;
-      labels = [];
-      data = [];
-      borderColor = 'rgba(100, 132, 255, 0.9)';
-      backgroundColor = 'rgba(100, 132, 255, 0.1)';
-      arData.forEach((obj, i, arr) => {
-        if (i === 0) {
-          this.nominal = obj['nominal']
-        }
-        labels.push(this.nominal + ' ' + obj['charCode']);
-        data.push((obj['value'] * this.nominal / obj['nominal']).toFixed(4));
-      });
-      this.chartDataCollection = {
-        "labels": labels,
-        "datasets": [{"label": this.selectedValuteName, "backgroundColor": backgroundColor, "data": data, "borderColor": borderColor}],
-        "backgroundColor": backgroundColor,
-        "color": borderColor,
-        "borderWidth": 4
-      }
-      this.chartReady = true;
+      this.dataChanged = true;
     },
     setDateRange(event) {
       if (!!event.startDate) {
@@ -143,6 +100,7 @@ export default {
       if (!!event.endDate) {
         this.dateRange.endDate = new Date(event.endDate).toISOString().slice(0,10);
       }
+      this.dataChanged = true;
     },
   },
   computed: {
