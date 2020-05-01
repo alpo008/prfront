@@ -1,11 +1,10 @@
 <template>
   <div class="container-fluid">
-    <nav class="navbar navbar-light bg-light pt-3 navbar-responsive">
+    <nav class="navbar navbar-light bg-light pt-3">
       <a class="navbar-brand" href="#">PRIAMOR</a>
       <form class="form-inline my-2 my-lg-0">
 
-        <app-dropdown :apiUrl="apiUrl" @valuteSelected="setValute">
-        </app-dropdown>
+        <app-dropdown :apiUrl="apiUrl" @valuteSelected="setValute"></app-dropdown>
 
         <label for="form__date-range">Даты</label>
 
@@ -19,7 +18,6 @@
           @update="setDateRange"
           id="form__date-range"
           v-model="dateRange"
-
         >
           <!--Optional scope for the input displaying the dates -->
           <div slot="input" slot-scope="picker" style="min-height: 24px">
@@ -30,22 +28,16 @@
         </date-range-picker>
       </form>
     </nav>
+
     <div class="row">
       <div class="col-lg-12">
         <div class="chartjs">
-          <valute-line-chart
-            :dateRange="dateRange"
-            :selectedValute="selectedValute"
-            :selectedValuteName="selectedValuteName"
-            :apiUrl="apiUrl"
-            :dataChanged="dataChanged"
-            @resetDataChanged="dataChanged = false"
-          >
-          </valute-line-chart>
+          <valute-line-chart :apiUrl="apiUrl"></valute-line-chart>
         </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -54,6 +46,7 @@ import Dropdown from "./Dropdown";
 import DateRangePicker from "vue2-daterange-picker";
 import "vue2-daterange-picker/dist/vue2-daterange-picker.css";
 import ValuteLineChart from "./LineChart.vue";
+import {eventEmitter} from "./main";
 
 export default {
   name: 'app',
@@ -100,12 +93,12 @@ export default {
       if (!!event.endDate) {
         this.dateRange.endDate = new Date(event.endDate).toISOString().slice(0,10);
       }
-      this.dataChanged = true;
+      eventEmitter.$emit('dateRangeChanged', this.dateRange)
     },
   },
   computed: {
     minDate () {
-      return '2020-03-05';
+      return '2020-03-15';
       },
     maxDate () {
       return new Date (new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0,10);

@@ -12,6 +12,8 @@
 </template>
 
 <script>
+    import {eventEmitter} from "./main";
+
     export default {
       name: "Dropdown",
       props: {
@@ -35,7 +37,7 @@
               });
           },
           selectValute(e) {
-            this.$emit('valuteSelected',
+            eventEmitter.$emit('valuteSelected',
               {code: e.target.value, name: this.valutes[e.target.value]}
             )
           }
