@@ -83,7 +83,7 @@
 </script>
 
 <style scoped>
-  .height-400{
+  .height-400 {
     height: 400px;
   }
 </style>

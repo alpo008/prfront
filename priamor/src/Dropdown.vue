@@ -1,5 +1,5 @@
 <template>
-  <div class ="app__form_element">
+  <div class ="form-group app__form_element">
     <label for="currency-select">Валюта</label>
 
     <select id="currency-select" class="form-control" @change="selectValute">
@@ -25,23 +25,23 @@
        }
       },
       methods: {
-          setValutes() {
-            fetch(this.apiUrl, {method: 'GET'})
-              .then(response => response.json())
-              .then(res => {
-                this.valutes = res;
-              })
-              .catch(e => {
-                console.log(e);//TODO
-                return {};
-              });
-          },
-          selectValute(e) {
-            eventEmitter.$emit('valuteSelected',
-              {code: e.target.value, name: this.valutes[e.target.value]}
-            )
-          }
+        setValutes() {
+          fetch(this.apiUrl, {method: 'GET'})
+            .then(response => response.json())
+            .then(res => {
+              this.valutes = res;
+            })
+            .catch(e => {
+              console.log(e);//TODO
+              return {};
+            });
         },
+        selectValute(e) {
+          eventEmitter.$emit('valuteSelected',
+            {code: e.target.value, name: this.valutes[e.target.value]}
+          )
+        }
+      },
       beforeMount() {
         this.setValutes();
       }
