@@ -33,42 +33,40 @@
     },
     props: {
       minDate: String,
-      dateFormat: String
+      dateFormat: String,
+      appLocale: Object
     },
     data() {
       return {
         dateRange: {"startDate": null, "endDate": null},
         localeData: {
-          "format": this.dateFormat,
-          "separator": " / ",
-          //"applyLabel": "Применить",
-          //"cancelLabel": "Отмена",
-          "fromLabel": "С",
-          "toLabel": "ПО",
-          "customRangeLabel": "Custom",
-          "weekLabel": "Нед",
-          "daysOfWeek": ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
-          "monthNames": ["Январь", "Февраль", "Март", "Апрель", "Май",
-            "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
-          ],
-          "firstDay": 1
+          format: this.dateFormat, // настройка через локаль, если `:auto-apply="false"`
+          separator: " / ",
+          //applyLabel: "Применить",
+          //cancelLabel: "Отмена",
+          fromLabel: "С",
+          toLabel: "ПО",
+          customRangeLabel: "Custom",
+          daysOfWeek: this.appLocale.weekdaysMin(),
+          monthNames: this.appLocale.monthsShort(),
+          firstDay: this.appLocale.firstDayOfWeek()
         }
       }
     },
     methods: {
       setDateRange(event) {
         if (!!event.startDate) {
-          this.dateRange.startDate = new Date(event.startDate).toISOString().slice(0,10);
+          this.dateRange.startDate = moment(event.startDate).format(this.dateFormat);
         }
         if (!!event.endDate) {
-          this.dateRange.endDate = new Date(event.endDate).toISOString().slice(0,10);
+          this.dateRange.endDate = moment(event.endDate).format(this.dateFormat);
         }
         eventEmitter.$emit('dateRangeChanged', this.dateRange)
       },
     },
     computed: {
       maxDate () {
-        return new Date (new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0,10);
+        return moment().endOf('day').format(this.dateFormat);
       }
     },
     filters: {
