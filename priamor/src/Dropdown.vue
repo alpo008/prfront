@@ -47,12 +47,3 @@
       }
     }
 </script>
-
-<style scoped>
-  .app__form_element {
-  }
-  .app__form_element > label {
-    display: inline-block;
-    margin-right: 15px;
-  }
-</style>
