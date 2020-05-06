@@ -3,6 +3,15 @@ import App from './App.vue'
 
 export const eventEmitter = new Vue();
 
+export const windowWidth = window.screen.availWidth
+
+window.addEventListener("orientationchange", () => {
+  eventEmitter.$emit('windowWidthChanged', window.screen.availWidth)
+}, false);
+window.addEventListener("resize", () => {
+  eventEmitter.$emit('windowWidthChanged', window.screen.availWidth)
+}, false);
+
 new Vue({
   el: '#app',
   render: h => h(App)

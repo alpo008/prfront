@@ -1,25 +1,49 @@
 <template>
-  <div class ="form-group app__form_element">
-    <label for="form__date-range">Даты</label>
-
-    <date-range-picker
-      :auto-apply="true"
-      :locale-data="localeData"
-      :max-date="maxDate"
-      :min-date="minDate"
-      :opens="'left'"
-      :ranges="false"
-      @update="setDateRange"
-      id="form__date-range"
-      v-model="dateRange"
-    >
-      <!--Optional scope for the input displaying the dates -->
-      <div slot="input" slot-scope="picker" style="min-height: 24px">
-        {{ picker.startDate | date }}
-        {{ !picker.startDate ? '' : '-' }}
-        {{ picker.endDate | date }}
+  <div>
+    <div class ="form-group app__form_element" v-show="availableWidth > smallWidth">
+      <label for="form__date-range">Даты</label>
+      <date-range-picker
+        :auto-apply="true"
+        :locale-data="localeData"
+        :max-date="maxDate"
+        :min-date="minDate"
+        :opens="'left'"
+        :ranges="false"
+        @update="setDateRange"
+        v-model="dateRange"
+      >
+        <!--Optional scope for the input displaying the dates -->
+        <div slot="input" slot-scope="picker" style="min-height: 24px" id="form__date-range">
+          {{ picker.startDate | date }}
+          {{ !picker.startDate ? '' : '-' }}
+          {{ picker.endDate | date }}
+        </div>
+      </date-range-picker>
+    </div>
+    <div class ="form-inline app__form_elements-group" v-show="availableWidth <= smallWidth">
+      <div class ="form-group">
+        <label for="startDateInput">C</label>
+        <input type="date"
+               id="startDateInput"
+               class="form-control"
+               v-model="dateRange.startDate"
+               @change="setDateRange"
+               :min="minDate"
+               :max="maxDate"
+        >
       </div>
-    </date-range-picker>
+      <div class ="form-group">
+        <label for="endDateInput">по</label>
+        <input type="date"
+               id="endDateInput"
+               class="form-control"
+               v-model="dateRange.endDate"
+               @change="setDateRange"
+               :min="dateRange.startDate ? dateRange.startDate :minDate"
+               :max="maxDate"
+        >
+      </div>
+    </div>
   </div>
 </template>
 
@@ -27,6 +51,7 @@
   import DateRangePicker from "vue2-daterange-picker";
   import "vue2-daterange-picker/dist/vue2-daterange-picker.css";
   import {eventEmitter} from "./main";
+  import {windowWidth} from "./main"
   export default {
     components: {
       DateRangePicker
@@ -36,8 +61,15 @@
       dateFormat: String,
       appLocale: Object
     },
+    mounted() {
+      eventEmitter.$on('windowWidthChanged', (e) => {
+        this.availableWidth = e
+      })
+    },
     data() {
       return {
+        availableWidth: windowWidth,
+        smallWidth: 635,
         dateRange: {"startDate": null, "endDate": null},
         localeData: {
           format: this.dateFormat, // настройка через локаль, если `:auto-apply="false"`
@@ -66,7 +98,7 @@
     },
     computed: {
       maxDate () {
-        return moment().endOf('day').format(this.dateFormat);
+        return moment().add(1,'days').endOf('day').format(this.dateFormat);
       }
     },
     filters: {
@@ -80,3 +112,8 @@
     }
   }
 </script>
+<style scoped>
+  .vue-daterange-picker {
+    display: block;
+  }
+</style>
