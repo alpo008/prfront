@@ -88,6 +88,11 @@
             xAxes: [{
               gridLines: {
                 display: false
+              },
+              ticks: {
+                  callback(val) {
+                    return moment(val).format('DD.MM.YYYY');
+                  }
               }
             }]
           },
@@ -95,8 +100,11 @@
             enabled: true,
               mode: 'single',
               callbacks: {
-              label: function(tooltipItems, data) {
+              label(tooltipItems, data) {
                 return tooltipItems.yLabel + ' ₽';
+              },
+              title(tooltipItems, data) {
+                return moment(tooltipItems[0].xLabel).format('DD.MM.YYYY');
               }
             }
           },

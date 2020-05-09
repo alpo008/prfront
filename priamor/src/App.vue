@@ -22,7 +22,7 @@
 
 import Dropdown from "./Dropdown"
 import DateRangePicker from "./DateRangePicker"
-import ValuteLineChart from "./LineChart.vue"
+//import ValuteLineChart from "./LineChart.vue"
 import ValuteBarChart from "./BarChart.vue"
 import moment from "moment"
 
