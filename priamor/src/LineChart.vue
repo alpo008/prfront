@@ -39,9 +39,13 @@
     methods: {
       setValuteData(url) {
         if (!!url) {
-          fetch(url)
+/*          fetch(url)
             .then(response => response.json())
             .then(res => this.fillDatasets(res))
+            .catch(e => console.log(e)) //TODO*/
+          this.$http.get(this.serverUrl)
+            .then(response => response.json())
+            .then(valuteData => this.fillDatasets(valuteData))
             .catch(e => console.log(e)) //TODO
         }
       },

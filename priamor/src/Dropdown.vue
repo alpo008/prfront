@@ -1,7 +1,6 @@
 <template>
   <div class ="form-group app__form_element">
     <label for="currency-select">Валюта</label>
-
     <select id="currency-select" class="form-control" @change="selectValute">
       <option value="null"></option>
       <option v-for="(value, name) in valutes" :value=name>
@@ -26,14 +25,11 @@
       },
       methods: {
         setValutes() {
-          fetch(this.apiUrl, {method: 'GET'})
+          this.$http.get(this.apiUrl)
             .then(response => response.json())
-            .then(res => {
-              this.valutes = res;
-            })
+            .then(valutes => { this.valutes = valutes })
             .catch(e => {
-              console.log(e);//TODO
-              return {};
+              console.log(e) //TODO
             });
         },
         selectValute(e) {
