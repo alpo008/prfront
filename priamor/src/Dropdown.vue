@@ -15,17 +15,15 @@
 
     export default {
       name: "Dropdown",
-      props: {
-        'apiUrl' : String
-      },
       data() {
        return {
          valutes: {},
+         resource: null
        }
       },
       methods: {
         setValutes() {
-          this.$http.get(this.apiUrl)
+          this.resource.get()
             .then(response => response.json())
             .then(valutes => { this.valutes = valutes })
             .catch(e => {
@@ -37,6 +35,9 @@
             {code: e.target.value, name: this.valutes[e.target.value]}
           )
         }
+      },
+      created() {
+        this.resource = this.$resource('')
       },
       beforeMount() {
         this.setValutes();

@@ -12,9 +12,6 @@
     components: {
       LineChart
     },
-    props: {
-      apiUrl: String,
-    },
     data () {
       return {
         selectedValute: '',
@@ -22,7 +19,8 @@
         dateRange: {},
         dataCollection: {},
         dataOptions: {responsive: true, maintainAspectRatio: false},
-        nominal: ''
+        nominal: '',
+        resource: null
       }
     },
     created: function () {
@@ -39,11 +37,8 @@
     methods: {
       setValuteData(url) {
         if (!!url) {
-/*          fetch(url)
-            .then(response => response.json())
-            .then(res => this.fillDatasets(res))
-            .catch(e => console.log(e)) //TODO*/
-          this.$http.get(this.serverUrl)
+          this.resource = this.$resource(url)
+          this.$http.get(url)
             .then(response => response.json())
             .then(valuteData => this.fillDatasets(valuteData))
             .catch(e => console.log(e)) //TODO
@@ -75,7 +70,7 @@
     computed: {
       serverUrl() {
         if (!!this.selectedValute && !!this.dateRange.startDate && !!this.dateRange.endDate) {
-          let url = this.apiUrl + this.selectedValute + '/' +
+          let url = this.selectedValute + '/' +
             this.dateRange.startDate + '/' + this.dateRange.endDate
           return url.replace(/\s+/g, '')
         } else {

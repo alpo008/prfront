@@ -12,16 +12,14 @@
     components: {
       BarChart
     },
-    props: {
-      apiUrl: String,
-    },
     data () {
       return {
         selectedValute: '',
         selectedValuteName: '',
         dateRange: {},
         dataCollection: {},
-        nominal: ''
+        nominal: '',
+        resource: null
       }
     },
     created: function () {
@@ -38,7 +36,8 @@
     methods: {
       setValuteData(url) {
         if (!!url) {
-          fetch(url)
+          this.resource = this.$resource(url)
+          this.resource.get()
             .then(response => response.json())
             .then(res => this.fillDatasets(res))
             .catch(e => console.log(e)) //TODO
@@ -70,7 +69,7 @@
     computed: {
       serverUrl() {
         if (!!this.selectedValute && !!this.dateRange.startDate && !!this.dateRange.endDate) {
-          let url = this.apiUrl + this.selectedValute + '/' +
+          let url = this.selectedValute + '/' +
             this.dateRange.startDate + '/' + this.dateRange.endDate
           return url.replace(/\s+/g, '')
         } else {

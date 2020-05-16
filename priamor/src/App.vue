@@ -3,7 +3,7 @@
     <nav class="navbar navbar-light bg-light pt-3">
       <a class="navbar-brand" href="#">PRIAMOR</a>
       <form class="form-inline my-2 my-lg-0">
-        <app-dropdown :apiUrl="apiUrl"></app-dropdown>
+        <app-dropdown></app-dropdown>
         <date-range-picker :min-date="'2020-03-13'" :date-format="'YYYY-MM-DD'" :app-locale="appLocale">
         </date-range-picker>
       </form>
@@ -11,7 +11,7 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="chartjs">
-          <valute-bar-chart :apiUrl="apiUrl"></valute-bar-chart>
+          <valute-bar-chart></valute-bar-chart>
         </div>
       </div>
     </div>
