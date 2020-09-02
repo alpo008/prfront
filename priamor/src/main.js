@@ -6,6 +6,12 @@ Vue.use(VueResource)
 
 Vue.http.options.root = 'http://alpo.pw/api/valute/'
 
+Vue.http.interceptors.push((request, next) => {
+  request.headers.set('Authorization', 'Bearer 100-token')
+  //request.headers.set('Accept', 'application/json')
+  next()
+})
+
 export const eventEmitter = new Vue();
 
 export const windowWidth = window.screen.availWidth
